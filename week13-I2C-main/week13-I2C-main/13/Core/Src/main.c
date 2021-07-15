@@ -55,7 +55,7 @@ uint8_t eepromDataReadBack[4];
 uint8_t IOExpdrDataReadBack;
 uint8_t IOExpdrDataWrite = 0b01010101;
 uint64_t timestamp=0;
-
+uint64_t buttonstate=0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -125,8 +125,21 @@ int main(void)
 		IOExpenderReadPinA(&IOExpdrDataReadBack);
 		if(HAL_GetTick()-timestamp>=100)
 		{
+			timestamp=HAL_GetTick();
 			IOExpdrExampleReadFlag=1;
 		}
+		if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)==0)
+		{
+			if(buttonstate==1)
+			{
+				eepromExampleWriteFlag=1;
+				IOExpdrDataWrite=IOExpdrDataReadBack;
+				IOExpdrExampleWriteFlag=1;
+			}
+		}
+		EEPROMWriteExample(IOExpdrDataReadBack);
+		IOExpenderWritePinB(IOExpdrDataWrite);
+		buttonstate=HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
 //		EEPROMWriteExample();
 //		EEPROMReadExample(eepromDataReadBack, 4);
 //
